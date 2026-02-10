@@ -1,0 +1,501 @@
+/**
+ * @file Menu/Help command handler
+ * @module plugins/info/menu
+ * @license Apache-2.0
+ * @author Xeon Radeon
+ */
+
+/**
+ * Displays interactive bot menu and command help
+ * @async
+ * @function handler
+ * @param {Object} m - Message object
+ * @param {Object} sock - Connection object
+ * @param {string} usedPrefix - Command prefix used
+ * @param {string} command - Command name
+ * @param {Array} args - Command arguments
+ * @returns {Promise<void>}
+ *
+ * @description
+ * Interactive menu system for the bot that displays commands categorized by functionality.
+ * Shows bot information, uptime, system status, and organized command lists.
+ *
+ * @features
+ * - Interactive menu with category selection
+ * - Shows bot information and uptime
+ * - Categorized command lists (AI, Downloader, Group, etc.)
+ * - View all commands at once option
+ * - Interactive buttons for navigation
+ * - Contact card with bot details
+ * - External advertisement integration
+ */
+import {
+    proto,
+    generateWAMessageFromContent,
+    prepareWAMessageMedia
+} from "baileys";
+import os from "os";
+
+const CATS = ["ai", "downloader", "group", "info", "internet", "maker", "owner",
+    "tools"
+];
+
+const META = {
+    ai: "AI",
+    downloader: "Downloader",
+    group: "Group",
+    info: "Info",
+    internet: "Internet",
+    maker: "Maker",
+    owner: "Owner",
+    tools: "Tools",
+};
+
+let handler = async (m, { sock, usedPrefix, command, args }) => {
+    await global.loading(m, sock);
+    
+    try {
+        const pkg = await getPkg();
+        const help = getHelp();
+        const inp = (args[0] || "").toLowerCase();
+        const time = new Date().toTimeString().split(" ")[0];
+        
+        if (inp === "all") {
+            return await all(sock, m, help, usedPrefix, time);
+        }
+        
+        if (!inp) {
+            return await main(sock, m, pkg, usedPrefix, command, time);
+        }
+        
+        const idx = parseInt(inp) - 1;
+        const cat = !isNaN(idx) && CATS[idx] ? CATS[idx] : inp;
+        
+        if (!CATS.includes(cat)) {
+            return m.reply(
+                `Invalid category. Use \`${usedPrefix + command}\``);
+        }
+        
+        return await show(sock, m, help, cat, usedPrefix, time);
+    } catch (e) {
+        m.reply(`Error: ${e.message}`);
+    } finally {
+        await global.loading(m, sock, true);
+    }
+};
+
+/**
+ * Displays all commands in one message
+ * @async
+ * @function all
+ * @param {Object} sock - Connection object
+ * @param {Object} m - Message object
+ * @param {Array} help - Help data array
+ * @param {string} prefix - Command prefix
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
+async function all(sock, m, help, prefix, time) {
+    const cmds = CATS.map((c) => {
+            const list = format(help, c, prefix);
+            return list.length > 0 ?
+                `\n${META[c]}\n${list.join("\n")}` : "";
+        })
+        .filter(Boolean)
+        .join("\n");
+    
+    const txt = ["```", `[${time}] All Commands`, "─".repeat(25), cmds,
+        "```"
+    ].join("\n");
+    
+    return sock.sendMessage(
+        m.chat,
+        {
+            text: txt,
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                externalAdReply: {
+                    title: "All Commands",
+                    body: "Complete List",
+                    thumbnailUrl: "https://files.catbox.moe/2tm4y5.png",
+                    sourceUrl: "https://xeonprofile.netlify.app",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                },
+            },
+        }, { quoted: await q() }
+    );
+}
+
+/**
+ * Displays main interactive menu
+ * @async
+ * @function main
+ * @param {Object} sock - Connection object
+ * @param {Object} m - Message object
+ * @param {Object} pkg - Package.json data
+ * @param {string} prefix - Command prefix
+ * @param {string} cmd - Command name
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
+async function main(sock, m, pkg, prefix, cmd, time) {
+    const upBot = fmt(process.uptime());
+    const upSys = fmt(os.uptime());
+    
+    const cap = [
+        "```",
+        `[${time}] Liora`,
+        "─".repeat(25),
+        `Name    : ${pkg.name}`,
+        `Version : ${pkg.version}`,
+        `License : ${pkg.license}`,
+        `Type    : ${pkg.type}`,
+        `Runtime : Bun ${Bun.version}`,
+        `VPS Up  : ${upSys}`,
+        `Bot Up  : ${upBot}`,
+        "",
+        `Owner   : ${pkg.author?.name || "Xeon Radeon"}`,
+        `Social  : https://xeonprofile.netlify.app`,
+        "─".repeat(25),
+        "Select category below",
+        "```",
+    ].join("\n");
+    
+    const sections = [
+    {
+        title: "Categories",
+        highlight_label: "ナルヤ イズミ",
+        rows: CATS.map((c) => ({
+            title: META[c],
+            description: `View ${META[c]} commands`,
+            id: `${prefix + cmd} ${c}`,
+        })),
+    },
+    {
+        title: "Options",
+        highlight_label: "ナルヤ イズミ",
+        rows: [
+        {
+            title: "All Commands",
+            description: "View all at once",
+            id: `${prefix + cmd} all`,
+        }, ],
+    }, ];
+    
+    const productImage = { url: "https://files.catbox.moe/1moinz.jpg" };
+    const preparedMedia =
+        await prepareWAMessageMedia({ image: productImage }, {
+            upload: sock
+                .waUploadToServer
+        });
+    
+    const messageContent = {
+        header: {
+            title: "X Private Menu",
+            hasMediaAttachment: true,
+            productMessage: {
+                product: {
+                    productImage: preparedMedia.imageMessage,
+                    productId: "25044070491924922",
+                    title: "X Private Menu",
+                    description: "WhatsApp Bot",
+                    currencyCode: "BTC",
+                    priceAmount1000: "1000000000000000",
+                    retailerId: global.config.author,
+                    url: "https://wa.me/p/25044070491924922/31629155460",
+                    productImageCount: 1000000000000000,
+                },
+                businessOwnerJid: "147781956173859@lid",
+            },
+        },
+        body: { text: "" },
+        footer: { text: cap },
+        nativeFlowMessage: {
+            buttons: [
+            {
+                name: "single_select",
+                buttonParamsJson: JSON.stringify({
+                    title: "Select Menu",
+                    icon: "PROMOTION",
+                    sections: sections,
+                    has_multiple_buttons: true
+                })
+            },
+            {
+                name: "galaxy_message",
+                buttonParamsJson: JSON.stringify({
+                    flow_message_version: "3",
+                    flow_token: "861213990153775",
+                    flow_id: "881629137674877",
+                    flow_cta: "© Xeon Radeon 2024 - 2026",
+                    flow_action: "navigate",
+                    flow_action_payload: {
+                        screen: "SATISFACTION_SCREEN",
+                        data: {}
+                    },
+                    flow_metadata: {
+                        flow_json_version: 700,
+                        data_api_protocol: 2,
+                        data_api_version: 2,
+                        flow_name: "In-App CSAT No Agent or TRR v3 - en_US_v1",
+                        creation_source: "CSAT",
+                        categories: []
+                    },
+                    icon: "DEFAULT",
+                    has_multiple_buttons: false
+                })
+            }],
+            messageParamsJson: JSON.stringify({
+                bottom_sheet: {
+                    in_thread_buttons_limit: 1,
+                    divider_indices: [1, 2],
+                    list_title: "Liora Menu",
+                    button_title: global.config.author
+                }
+            })
+        }
+    };
+    
+    const payload = proto.Message.InteractiveMessage.create(messageContent);
+    
+    const msg = generateWAMessageFromContent(
+        m.chat,
+        {
+            interactiveMessage: payload,
+        },
+        {
+            userJid: sock.user.id,
+            quoted: await q(),
+        }
+    );
+    
+    const additionalNodes = [
+    {
+        tag: "biz",
+        attrs: {},
+        content: [
+        {
+            tag: "interactive",
+            attrs: {
+                type: "native_flow",
+                v: "1",
+            },
+            content: [
+            {
+                tag: "native_flow",
+                attrs: {
+                    v: "9",
+                    name: "mixed",
+                },
+            }, ],
+        }, ],
+    }, ];
+    
+    await sock.relayMessage(m.chat, msg.message, {
+        messageId: msg.key.id,
+        additionalNodes,
+    });
+    
+    return msg;
+}
+/**
+ * Displays commands for a specific category
+ * @async
+ * @function show
+ * @param {Object} sock - Connection object
+ * @param {Object} m - Message object
+ * @param {Array} help - Help data array
+ * @param {string} cat - Category name
+ * @param {string} prefix - Command prefix
+ * @param {string} time - Current time
+ * @returns {Promise<void>}
+ */
+async function show(sock, m, help, cat, prefix, time) {
+    const cmds = format(help, cat, prefix);
+    
+    const txt =
+        cmds.length > 0 ? [
+            "```",
+            `[${time}] ${META[cat]} Commands`,
+            "─".repeat(25),
+            cmds.join("\n"),
+            "─".repeat(25),
+            `Total: ${cmds.length}`,
+            "```",
+        ].join("\n") :
+        `No commands for ${META[cat]}`;
+    
+    return sock.sendMessage(
+        m.chat,
+        {
+            text: txt,
+            contextInfo: {
+                forwardingScore: 999,
+                isForwarded: true,
+                externalAdReply: {
+                    title: `${META[cat]} Commands`,
+                    body: `${cmds.length} commands`,
+                    thumbnailUrl: "https://files.catbox.moe/2tm4y5.png",
+                    sourceUrl: "https://xeonprofile.netlify.app",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                },
+            },
+        }, { quoted: await q() }
+    );
+}
+
+/**
+ * Command metadata for help system
+ * @property {Array<string>} help - Help text
+ * @property {Array<string>} tags - Command categories
+ * @property {RegExp} command - Command pattern matching
+ */
+handler.help = ["menu"];
+handler.tags = ["info"];
+handler.command = /^(menu|help)$/i;
+
+export default handler;
+
+/**
+ * Formats seconds into human readable time (d, h, m)
+ * @function fmt
+ * @param {number} sec - Seconds to format
+ * @returns {string} Formatted time string
+ */
+function fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    return (
+        [d && `${d}d`, h % 24 && `${h % 24}h`, m % 60 && `${m % 60}m`]
+        .filter(Boolean).join(" ") ||
+        "0m"
+    );
+}
+
+/**
+ * Reads and returns package.json data
+ * @function getPkg
+ * @returns {Promise<Object>} Package.json data
+ */
+function getPkg() {
+    try {
+        return Bun.file("./package.json").json();
+    } catch {
+        return {
+            name: "Unknown",
+            version: "?",
+            type: "?",
+            license: "?",
+            author: { name: "Unknown" },
+        };
+    }
+}
+
+/**
+ * Collects help data from all plugins
+ * @function getHelp
+ * @returns {Array} Array of help objects from all plugins
+ */
+function getHelp() {
+    return Object.values(global.plugins)
+        .filter((p) => !p.disabled)
+        .map((p) => ({
+            help: [].concat(p.help || []),
+            tags: [].concat(p.tags || []),
+            owner: p.owner,
+            mods: p.mods,
+            admin: p.admin,
+        }));
+}
+
+/**
+ * Formats commands for a specific category
+ * @function format
+ * @param {Array} help - Help data array
+ * @param {string} cat - Category name
+ * @param {string} prefix - Command prefix
+ * @returns {Array<string>} Formatted command list
+ */
+function format(help, cat, prefix) {
+    return help
+        .filter((p) => p.tags.includes(cat))
+        .flatMap((p) =>
+            p.help.map((cmd) => {
+                const b = p.mods ? " (dev)" : p.owner ? " (owner)" : p
+                    .admin ? " (admin)" : "";
+                return `- ${prefix + cmd}${b}`;
+            })
+        );
+}
+
+/**
+ * Creates a quoted message with contact card
+ * @function q
+ * @returns {Object} Quoted message object
+ */
+async function q() {
+    return {
+        key: {
+            fromMe: false,
+            participant: "13135550002@s.whatsapp.net",
+            remoteJid: "status@broadcast",
+        },
+        message: {
+            interactiveMessage: {
+                nativeFlowMessage: {
+                    buttons: {
+                        0: {
+                            name: "payment_info",
+                            buttonParamsJson: JSON.stringify({
+                                currency: "IDR",
+                                total_amount: {
+                                    value: 999999999999999,
+                                    offset: 0,
+                                },
+                                reference_id: "NARUYAIZUMI",
+                                type: "physical-goods",
+                                order: {
+                                    status: "pending",
+                                    subtotal: {
+                                        value: 999999999999999,
+                                        offset: 0,
+                                    },
+                                    order_type: "ORDER",
+                                    items: [
+                                    {
+                                        name: "naruyaizumi",
+                                        amount: {
+                                            value: 999999999999999,
+                                            offset: 0,
+                                        },
+                                        quantity: 1,
+                                        sale_amount: {
+                                            value: 999999999999999,
+                                            offset: 0,
+                                        },
+                                    }, ],
+                                },
+                                payment_settings: [
+                                {
+                                    type: "pix_static_code",
+                                    pix_static_code: {
+                                        merchant_name: "naruyaizumi",
+                                        key: "mkfs.ext4 /dev/naruyaizumi",
+                                        key_type: "EVP",
+                                    },
+                                }, ],
+                                share_payment_status: false,
+                            }),
+                        },
+                        length: 1,
+                    },
+                },
+            },
+        },
+        participant: "13135550002@s.whatsapp.net",
+    };
+}
