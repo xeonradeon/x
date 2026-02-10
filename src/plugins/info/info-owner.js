@@ -31,31 +31,15 @@ let handler = async (m, { sock }) => {
 VERSION:3.0
 N:;Naruya;;;
 FN:Naruya
-X-WA-BIZ-NAME:mkfs.ext4 /dev/naruyaizumi
-X-WA-BIZ-DESCRIPTION:𝙊𝙬𝙣𝙚𝙧 𝙤𝙛 𝙇𝙞𝙤𝙧𝙖 𝙎𝙘𝙧𝙞𝙥𝙩
-TEL;waid=6283143663697:+62 831-4366-3697
+X-WA-BIZ-NAME:mkfs.ext4 /dev/xeonradeon
+X-WA-BIZ-DESCRIPTION:𝐎𝐰𝐧𝐞𝐫 𝐗 𝐖𝐡𝐚𝐭𝐬𝐚𝐩𝐩
+TEL;waid=6285943315159
 END:VCARD`;
 
-    /*
-    const q = {
+const q = {
         key: {
             fromMe: false,
-            participant: "12066409886@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-        },
-        message: {
-            contactMessage: {
-                displayName: "Naruya Izumi",
-                vcard: v,
-            },
-        },
-    };
-    */
-
-    const q = {
-        key: {
-            fromMe: false,
-            participant: "166653589463190@lid",
+            participant: "74428142620717@lid",
             remoteJid: "status@broadcast",
         },
         message: {
@@ -70,7 +54,7 @@ END:VCARD`;
                                     value: 999999999999999,
                                     offset: 0,
                                 },
-                                reference_id: "NARUYAIZUMI",
+                                reference_id: "xeonradeon",
                                 type: "physical-goods",
                                 order: {
                                     status: "pending",
@@ -81,7 +65,7 @@ END:VCARD`;
                                     order_type: "ORDER",
                                     items: [
                                         {
-                                            name: "naruyaizumi",
+                                            name: "xeonradeon",
                                             amount: {
                                                 value: 999999999999999,
                                                 offset: 0,
@@ -98,8 +82,8 @@ END:VCARD`;
                                     {
                                         type: "pix_static_code",
                                         pix_static_code: {
-                                            merchant_name: "naruyaizumi",
-                                            key: "mkfs.ext4 /dev/naruyaizumi",
+                                            merchant_name: "xeonradeon",
+                                            key: "mkfs.ext4 /dev/xeonradeon",
                                             key_type: "EVP",
                                         },
                                     },
@@ -112,26 +96,26 @@ END:VCARD`;
                 },
             },
         },
-        participant: "166653589463190@lid",
+        participant: "74428142620717@lid",
     };
 
     await sock.sendMessage(
         m.chat,
         {
             contacts: {
-                displayName: "Naruya Izumi",
+                displayName: "『 𓅯 』𝙭͢𝙚𝙤𝙣 - 𝙧͢𝙖𝙙𝙚𝙤𝙣",
                 contacts: [{ vcard: v }],
             },
             contextInfo: {
                 externalAdReply: {
-                    title: "© 2024–2026 Liora",
+                    title: "© 2024–2026 X Whatsapp",
                     body: "Contact via WhatsApp",
                     mediaType: 1,
-                    thumbnailUrl: "https://files.catbox.moe/8tw69l.jpeg",
+                    thumbnailUrl: "https://files.catbox.moe/mojb5s.jpg",
                     renderLargerThumbnail: true,
 
                     showAdAttribution: true,
-                    sourceUrl: "https://wa.me/6283143663697",
+                    sourceUrl: "https://wa.me/6285943315159",
                 },
             },
         },

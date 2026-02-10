@@ -184,9 +184,9 @@ PAIRING_CODE=$PAIRING_CODE
 # ============================================
 # BOT METADATA
 # ============================================
-WATERMARK=Liora
-AUTHOR=Naruya Izumi
-THUMBNAIL_URL=https://qu.ax/DdwBH.jpg
+WATERMARK=X
+AUTHOR=『 𓅯 』𝙭͢𝙚𝙤𝙣 - 𝙧͢𝙖𝙙𝙚𝙤𝙣
+THUMBNAIL_URL=https://files.catbox.moe/mojb5s.jpg
 
 # ============================================
 # LOGGER CONFIGURATION

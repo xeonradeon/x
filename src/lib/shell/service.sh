@@ -5,13 +5,13 @@ create_service() {
     
     cat > "$SERVICE_FILE" <<'EOL'
 [Unit]
-Description=Liora WhatsApp Bot
-Documentation=https://github.com/naruyaizumi/liora
+Description=x WhatsApp Bot
+Documentation=https://github.com/xeonradeon/x
 Wants=network-online.target
 After=network-online.target
-AssertPathExists=/root/liora
+AssertPathExists=/root/x
 AssertPathExists=/root/.bun/bin/bun
-AssertFileNotEmpty=/root/liora/.env
+AssertFileNotEmpty=/root/x/.env
 StartLimitIntervalSec=60
 StartLimitBurst=5
 
@@ -19,7 +19,7 @@ StartLimitBurst=5
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/root/liora
+WorkingDirectory=/root/x
 ExecStart=/root/.bun/bin/bun run --smol src/main.js
 Restart=always
 RestartSec=5
@@ -50,7 +50,7 @@ SystemCallArchitectures=native
 ReadWritePaths=
 ReadOnlyPaths=
 
-EnvironmentFile=/root/liora/.env
+EnvironmentFile=/root/x/.env
 Environment=NODE_ENV=production
 Environment=TZ=Asia/Jakarta
 Environment=PATH=/root/.bun/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -62,7 +62,7 @@ Environment=MALLOC_ARENA_MAX=2
 
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=liora-bot
+SyslogIdentifier=x-bot
 
 [Install]
 WantedBy=multi-user.target
@@ -96,7 +96,7 @@ print_completion() {
 System Information:
 --------------------
   OS:        $OS_ID
-  Liora:     $CURRENT_VERSION
+  X:     $CURRENT_VERSION
   Bun:       v$BUN_VERSION
 
 Installation Details:
