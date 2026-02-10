@@ -2,13 +2,13 @@
 
 set -euo pipefail
 
-GITHUB_RAW="https://raw.githubusercontent.com/naruyaizumi/liora/main/src/lib/shell"
-SERVICE_NAME="liora"
-SERVICE_FILE="/etc/systemd/system/liora.service"
+GITHUB_RAW="https://raw.githubusercontent.com/xeonradeon/x/main/src/lib/shell"
+SERVICE_NAME="x"
+SERVICE_FILE="/etc/systemd/system/x.service"
 HELPER_FILE="/usr/local/bin/bot"
-WORK_DIR="/root/liora"
+WORK_DIR="/root/x"
 BUN_PATH="/root/.bun/bin/bun"
-REPO_URL="https://github.com/naruyaizumi/liora.git"
+REPO_URL="https://github.com/xeonradeon/x.git"
 TIME_ZONE="Asia/Jakarta"
 
 print_error() { echo "[ERROR] $1" >&2; }
@@ -51,13 +51,13 @@ print_banner() {
     cat << "EOF"
 +------------------------------------------+
 |                                          |
-|          LIORA BOT INSTALLER             |
+|              X BOT INSTALLER             |
 |                                          |
 +------------------------------------------+
 
-Repository: https://github.com/naruyaizumi/liora
+Repository: https://github.com/xeonradeon/x
 License:    Apache 2.0
-Author:     Naruya Izumi
+Author:     Xeon Radeom
 
 EOF
 }
